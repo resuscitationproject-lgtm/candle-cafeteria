@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>初回参加 - 縁日食堂</title>
+  <link rel="stylesheet" href="css_style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>初めての参加</h1>
+      <a href="index.html" class="back-link">← 戻る</a>
+    </header>
+
+    <main>
+      <form id="firstForm" class="form">
+        <div class="form-group">
+          <label for="name">お名前 <span class="required">*</span></label>
+          <input type="text" id="name" name="name" required placeholder="山田太郎">
+        </div>
+
+        <!-- 区分選択 -->
+        <div class="form-group">
+          <label>区分 <span class="required">*</span></label>
+          <div class="category-buttons">
+            <button type="button" class="category-btn" data-category="学生" data-price="500">
+              <span class="category-label">🎓 学生</span>
+              <span class="category-price">500円</span>
+            </button>
+            <button type="button" class="category-btn" data-category="社会人" data-price="2000">
+              <span class="category-label">💼 社会人</span>
+              <span class="category-price">2,000円</span>
+            </button>
+          </div>
+          <input type="hidden" id="category" name="category" required>
+          <input type="hidden" id="price" name="price">
+        </div>
+
+        <!-- 料金表示エリア -->
+        <div class="price-display" id="priceDisplay" style="display: none;">
+          <div class="price-label">💰 お支払い料金</div>
+          <div class="price-amount" id="totalPrice">0円</div>
+          <div class="price-note">※当日受付でお支払いください</div>
+        </div>
+
+        <div class="form-group">
+          <label for="contact">連絡先 <span class="required">*</span></label>
+          <input type="text" id="contact" name="contact" required 
+                 placeholder="電話番号 または メールアドレス">
+          <small>当日連絡が取れる連絡先をご記入ください</small>
+        </div>
+
+        <div class="form-group">
+          <label for="memo">備考(任意)</label>
+          <textarea id="memo" name="memo" rows="3" 
+                    placeholder="アレルギーや特記事項があればご記入ください"></textarea>
+        </div>
+
+        <button type="submit" class="button button-submit" id="submitBtn">
+          <span class="loading-spinner" style="display: none;">⏳</span>
+          <span class="submit-text">受付する</span>
+        </button>
+      </form>
+    </main>
+  </div>
+
+  <script src="js_config.js"></script>
+  <script src="js_submit.js"></script>
+  <script>
+    let selectedCategory = '';
+    let selectedPrice = 0;
+
+    // 区分ボタンの処理
+    document.querySelectorAll('.category-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.category-btn').forEach(b => 
+          b.classList.remove('active'));
+        this.classList.add('active');
+        
+        selectedCategory = th
