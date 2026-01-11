@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>当日参加 - 縁日食堂</title>
+  <link rel="stylesheet" href="css_style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>今日の参加</h1>
+      <a href="index.html" class="back-link">← 戻る</a>
+    </header>
+
+    <main>
+      <form id="todayForm" class="form">
+        <div class="form-group">
+          <label for="name">お名前 <span class="required">*</span></label>
+          <input type="text" id="name" name="name" required placeholder="山田太郎">
+        </div>
+
+        <!-- 区分選択 -->
+        <div class="form-group">
+          <label>区分 <span class="required">*</span></label>
+          <div class="category-buttons">
+            <button type="button" class="category-btn" data-category="学生" data-price="500">
+              <span class="category-label">🎓 学生</span>
+              <span class="category-price">500円</span>
+            </button>
+            <button type="button" class="category-btn" data-category="社会人" data-price="2000">
+              <span class="category-label">💼 社会人</span>
+              <span class="category-price">2,000円</span>
+            </button>
+          </div>
+          <input type="hidden" id="category" name="category" required>
+          <input type="hidden" id="price" name="price">
+        </div>
+
+        <!-- 料金表示エリア -->
+        <div class="price-display" id="priceDisplay" style="display: none;">
+          <div class="price-label">💰 お支払い料金</div>
+          <div class="price-amount" id="totalPrice">0円</div>
+          <div class="price-note">※当日受付でお支払いください</div>
+        </div>
+
+        <button type="submit" class="button button-submit" id="submitBtn">
+          <span class="loading-spinner" style="display: none;">⏳</span>
+          <span class="submit-text">受付する</span>
+        </button>
+      </form>
+    </main>
+  </div>
+
+  <script src="js_config.js"></script>
+  <script src="js_submit.js"></script>
+  <script>
+    let selectedCategory = '';
+    let selectedPrice = 0;
+
+    // 区分ボタンの処理
+    document.querySelectorAll('.category-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.category-btn').forEach(b => 
+          b.classList.remove('active'));
+        this.classList.add('active');
+        
+        selectedCategory = this.dataset.category;
+        selectedPrice = parseInt(this.dataset.price);
+        
+        document.getElementById('category').value = selectedCategory;
+        document.getElementById('price').value = selectedPrice;
+        
+        // 料金表示を更新
+        document.getElementById('priceDisplay').style.display = 'block';
+        document.getElementById('totalPrice').textContent = 
+          selectedPrice.toLocaleString() + '円';
+      });
+    });
+
+    // フォーム送信
+    document.getElementById('todayForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('submitBtn');
+      const spinner = submitBtn.querySelector('.loading-spinner');
+      const text = submitBtn.querySelector('.submit-text');
+      
+      submitBtn.disabled = true;
+      spinner.style.display = 'inline-block';
+      text.textContent = '送信中...';
+
+      const formData = {
+        type: '当日参加',
+        name: document.getElementById('name').value,
+        category: document.getElementById('category').value,
+        price: document.getElementById('price').value,
+        contact: '',
+        memo: '',
+        timestamp: new Date().toLocaleString('ja-JP')
+      };
+
+      try {
+        await submitToGoogleForm(formData);
+        // 完了画面へデータを渡す
+        const params = new URLSearchParams({
+          type: 'today',
+          name: formData.name,
+          category: formData.category,
+          price: formData.price
+        });
+        window.location.href = 'complete.html?' + params.toString();
+      } catch (error) {
+        alert('送信に失敗しました。もう一度お試しください。');
+        submitBtn.disabled = false;
+        spinner.style.display = 'none';
+        text.textContent = '受付する';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>受付完了 - 縁日食堂</title>
+  <link rel="stylesheet" href="css_style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="success-icon">✅</div>
+      <h1>受付完了しました！</h1>
+    </header>
+
+    <main>
+      <div class="message-box">
+        <h3>【受付内容】</h3>
+        <div class="receipt">
+          <div class="receipt-row">
+            <span class="label">お名前:</span>
+            <span class="value" id="displayName"></span>
+          </div>
+          <div class="receipt-row">
+            <span class="label">区分:</span>
+            <span class="value" id="displayCategory"></span>
+          </div>
+          <div class="receipt-row total">
+            <span class="label">💰 料金:</span>
+            <span class="value price" id="displayPrice"></span>
+          </div>
+        </div>
+        <p class="payment-note">当日受付でお支払いください</p>
+        <p class="sub-message">お待ちしています😊</p>
+      </div>
+
+      <a href="index.html" class="button button-primary">
+        トップに戻る
+      </a>
+    </main>
+  </div>
+
+  <script>
+    // URLパラメータから情報を取得
+    const params = new URLSearchParams(window.location.search);
+    
+    document.getElementById('displayName').textContent = 
+      params.get('name') || '';
+    document.getElementById('displayCategory').textContent = 
+      params.get('category') || '';
+    
+    const price = params.get('price');
+    if (price) {
+      document.getElementById('displayPrice').textContent = 
+        parseInt(price).toLocaleString() + '円';
+    }
+  </script>
+</body>
+</html>
