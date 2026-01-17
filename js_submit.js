@@ -1,30 +1,36 @@
 /**
- * Google Formsへデータを送信
+ * Google Formsへデータを送信（GAS経由）
  */
 async function submitToGoogleForm(data) {
-  const formData = new FormData();
-  
-  // エントリーIDに値を設定
-  formData.append(CONFIG.ENTRY_IDS.type, data.type);
-  formData.append(CONFIG.ENTRY_IDS.name, data.name);
-  formData.append(CONFIG.ENTRY_IDS.category, data.category);
-  formData.append(CONFIG.ENTRY_IDS.price, data.price);
-  formData.append(CONFIG.ENTRY_IDS.contact, data.contact || '');
-  formData.append(CONFIG.ENTRY_IDS.memo, data.memo || '');
-  
-  try {
-    // Google Formsに送信（CORS制限を回避するためno-corsモード）
-    await fetch(CONFIG.FORM_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      body: formData
-    });
-    
-    return true;
-  } catch (error) {
-    console.error('送信エラー:', error);
-    throw error;
-  }
+    try {
+        // GAS Web Appに送信
+        const response = await fetch(CONFIG.FORM_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                type: data.type,
+                name: data.name,
+                category: data.category,
+                price: data.price,
+                contact: data.contact || '',
+                memo: data.memo || ''
+            })
+        });
+
+        const result = await response.json();
+        
+        if (!result.success) {
+            throw new Error(result.error || '送信に失敗しました');
+        }
+        
+        return true;
+
+    } catch (error) {
+        console.error('送信エラー:', error);
+        throw error;
+    }
 }
 
 /**
@@ -32,6 +38,6 @@ async function submitToGoogleForm(data) {
  * (送信失敗時の保険)
  */
 function saveToLocalStorage(data) {
-  const key = 'enjin_backup_' + Date.now();
-  localStorage.setItem(key, JSON.stringify(data));
+    const key = 'enjin_backup_' + Date.now();
+    localStorage.setItem(key, JSON.stringify(data));
 }
