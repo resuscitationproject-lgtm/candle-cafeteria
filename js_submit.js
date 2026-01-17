@@ -32,12 +32,3 @@ async function submitToGoogleForm(data) {
         throw error;
     }
 }
-
-/**
- * ローカルストレージにバックアップ保存
- * (送信失敗時の保険)
- */
-function saveToLocalStorage(data) {
-    const key = 'enjin_backup_' + Date.now();
-    localStorage.setItem(key, JSON.stringify(data));
-}
