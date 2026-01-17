@@ -8,9 +8,8 @@ const CONFIG = {
     type: 'entry.545390933',      // 参加区分
     name: 'entry.1112925744',     // お名前
     category: 'entry.752439379',  // 区分
-    price: 'entry.783987414',     // 料金
+    price: 'entry.783987784',     // 料金
     contact: 'entry.92546563',    // 連絡先
     memo: 'entry.1301860409'      // 備考
   }
 };
-```
