@@ -61,60 +61,76 @@
     // 区分ボタンの処理
     document.querySelectorAll('.category-btn').forEach(btn => {
       btn.addEventListener('click', function() {
+        // 全てのボタンからactiveクラスを削除
         document.querySelectorAll('.category-btn').forEach(b => 
           b.classList.remove('active'));
+        
+        // クリックされたボタンにactiveクラスを追加
         this.classList.add('active');
         
+        // 選択された区分と料金を取得
         selectedCategory = this.dataset.category;
         selectedPrice = parseInt(this.dataset.price);
         
+        // hidden inputに値を設定
         document.getElementById('category').value = selectedCategory;
         document.getElementById('price').value = selectedPrice;
         
-        // 料金表示を更新
-        document.getElementById('priceDisplay').style.display = 'block';
+        // 料金表示エリアを更新して表示
         document.getElementById('totalPrice').textContent = 
           selectedPrice.toLocaleString() + '円';
+        document.getElementById('priceDisplay').style.display = 'block';
       });
     });
 
-    // フォーム送信
-    document.getElementById('todayForm').addEventListener('submit', async (e) => {
+    // フォーム送信処理
+    document.getElementById('todayForm').addEventListener('submit', async function(e) {
       e.preventDefault();
+      
+      // 区分が選択されているか確認
+      if (!selectedCategory) {
+        alert('区分を選択してください');
+        return;
+      }
       
       const submitBtn = document.getElementById('submitBtn');
       const spinner = submitBtn.querySelector('.loading-spinner');
-      const text = submitBtn.querySelector('.submit-text');
+      const submitText = submitBtn.querySelector('.submit-text');
       
+      // ローディング表示
       submitBtn.disabled = true;
       spinner.style.display = 'inline-block';
-      text.textContent = '送信中...';
-
-      const formData = {
-        type: '当日参加',
-        name: document.getElementById('name').value,
-        category: document.getElementById('category').value,
-        price: document.getElementById('price').value,
-        contact: '',
-        memo: '',
-        timestamp: new Date().toLocaleString('ja-JP')
-      };
+      submitText.textContent = '送信中...';
 
       try {
+        // フォームデータを取得
+        const formData = {
+          type: '今月参加',  // ✅ 固定値に変更
+          name: document.getElementById('name').value,
+          category: selectedCategory,
+          price: selectedPrice,
+          contact: '',
+          memo: ''
+        };
+
+        // Google Formsへ送信
         await submitToGoogleForm(formData);
-        // 完了画面へデータを渡す
-        const params = new URLSearchParams({
-          type: 'today',
-          name: formData.name,
-          category: formData.category,
-          price: formData.price
-        });
-        window.location.href = 'complete.html?' + params.toString();
+        
+        // ローカルストレージにバックアップ
+        saveToLocalStorage(formData);
+        
+        // ✅ 完了ページへ遷移（パラメータ追加）
+        location.href = 'complete.html?name=' + encodeURIComponent(formData.name) + 
+                        '&category=' + encodeURIComponent(formData.category) + 
+                        '&price=' + selectedPrice;
+        
       } catch (error) {
-        alert('送信に失敗しました。もう一度お試しください。');
+        alert('送信に失敗しました。もう一度お試しください。\n' + error.message);
+        
+        // ボタンを元に戻す
         submitBtn.disabled = false;
         spinner.style.display = 'none';
-        text.textContent = '受付する';
+        submitText.textContent = '受付する';
       }
     });
   </script>
