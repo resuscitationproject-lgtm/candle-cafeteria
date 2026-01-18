@@ -117,7 +117,7 @@
       try {
         // フォームデータを取得
         const formData = {
-          type: selectedCategory,
+          type: '初めて参加',  // ✅ 固定値に変更
           name: document.getElementById('name').value,
           category: selectedCategory,
           price: selectedPrice,
@@ -131,8 +131,10 @@
         // ローカルストレージにバックアップ
         saveToLocalStorage(formData);
         
-        // 完了ページへ遷移
-        location.href = 'complete.html?price=' + selectedPrice;
+        // ✅ 完了ページへ遷移（パラメータ追加）
+        location.href = 'complete.html?name=' + encodeURIComponent(formData.name) + 
+                        '&category=' + encodeURIComponent(formData.category) + 
+                        '&price=' + selectedPrice;
         
       } catch (error) {
         alert('送信に失敗しました。もう一度お試しください。\n' + error.message);
