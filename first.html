@@ -12,14 +12,13 @@
       <h1>初めての参加</h1>
       <a href="index.html" class="back-link">← 戻る</a>
     </header>
-
     <main>
       <form id="firstForm" class="form">
         <div class="form-group">
           <label for="name">お名前 <span class="required">*</span></label>
           <input type="text" id="name" name="name" required placeholder="山田太郎">
         </div>
-
+        
         <!-- 区分選択 -->
         <div class="form-group">
           <label>区分 <span class="required">*</span></label>
@@ -36,27 +35,27 @@
           <input type="hidden" id="category" name="category" required>
           <input type="hidden" id="price" name="price">
         </div>
-
+        
         <!-- 料金表示エリア -->
         <div class="price-display" id="priceDisplay" style="display: none;">
           <div class="price-label">💰 お支払い料金</div>
           <div class="price-amount" id="totalPrice">0円</div>
           <div class="price-note">※当日受付でお支払いください</div>
         </div>
-
+        
         <div class="form-group">
           <label for="contact">連絡先 <span class="required">*</span></label>
           <input type="text" id="contact" name="contact" required 
                  placeholder="電話番号 または メールアドレス">
           <small>当日連絡が取れる連絡先をご記入ください</small>
         </div>
-
+        
         <div class="form-group">
           <label for="memo">備考(任意)</label>
           <textarea id="memo" name="memo" rows="3" 
                     placeholder="アレルギーや特記事項があればご記入ください"></textarea>
         </div>
-
+        
         <button type="submit" class="button button-submit" id="submitBtn">
           <span class="loading-spinner" style="display: none;">⏳</span>
           <span class="submit-text">受付する</span>
@@ -64,18 +63,86 @@
       </form>
     </main>
   </div>
-
+  
   <script src="js_config.js"></script>
   <script src="js_submit.js"></script>
   <script>
     let selectedCategory = '';
     let selectedPrice = 0;
-
+    
     // 区分ボタンの処理
     document.querySelectorAll('.category-btn').forEach(btn => {
       btn.addEventListener('click', function() {
+        // 全てのボタンからactiveクラスを削除
         document.querySelectorAll('.category-btn').forEach(b => 
           b.classList.remove('active'));
+        
+        // クリックされたボタンにactiveクラスを追加
         this.classList.add('active');
         
-        selectedCategory = th
+        // 選択された区分と料金を取得
+        selectedCategory = this.dataset.category;
+        selectedPrice = parseInt(this.dataset.price);
+        
+        // hidden inputに値を設定
+        document.getElementById('category').value = selectedCategory;
+        document.getElementById('price').value = selectedPrice;
+        
+        // 料金表示エリアを更新して表示
+        document.getElementById('totalPrice').textContent = 
+          selectedPrice.toLocaleString() + '円';
+        document.getElementById('priceDisplay').style.display = 'block';
+      });
+    });
+    
+    // フォーム送信処理
+    document.getElementById('firstForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      // 区分が選択されているか確認
+      if (!selectedCategory) {
+        alert('区分を選択してください');
+        return;
+      }
+      
+      const submitBtn = document.getElementById('submitBtn');
+      const spinner = submitBtn.querySelector('.loading-spinner');
+      const submitText = submitBtn.querySelector('.submit-text');
+      
+      // ローディング表示
+      submitBtn.disabled = true;
+      spinner.style.display = 'inline-block';
+      submitText.textContent = '送信中...';
+      
+      try {
+        // フォームデータを取得
+        const formData = {
+          type: selectedCategory,
+          name: document.getElementById('name').value,
+          category: selectedCategory,
+          price: selectedPrice,
+          contact: document.getElementById('contact').value,
+          memo: document.getElementById('memo').value
+        };
+        
+        // Google Formsへ送信
+        await submitToGoogleForm(formData);
+        
+        // ローカルストレージにバックアップ
+        saveToLocalStorage(formData);
+        
+        // 完了ページへ遷移
+        location.href = 'complete.html?price=' + selectedPrice;
+        
+      } catch (error) {
+        alert('送信に失敗しました。もう一度お試しください。\n' + error.message);
+        
+        // ボタンを元に戻す
+        submitBtn.disabled = false;
+        spinner.style.display = 'none';
+        submitText.textContent = '受付する';
+      }
+    });
+  </script>
+</body>
+</html>
