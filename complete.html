@@ -12,7 +12,6 @@
       <div class="success-icon">✅</div>
       <h1>受付完了しました！</h1>
     </header>
-
     <main>
       <div class="message-box">
         <h3>【受付内容】</h3>
@@ -31,15 +30,19 @@
           </div>
         </div>
         <p class="payment-note">当日受付でお支払いください</p>
+        
+        <!-- ✅ 追加文言 -->
+        <div style="margin-top: 20px; padding: 15px; background-color: rgba(255,255,255,0.1); border-radius: 8px; font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.9);">
+          本イベントは非営利活動の一環として実施しており、参加費は若者支援及び運営や材料費相当の協力金です。売買ではないため、領収書の発行は行っておりません。
+        </div>
+        
         <p class="sub-message">お待ちしています😊</p>
       </div>
-
       <a href="index.html" class="button button-primary">
         トップに戻る
       </a>
     </main>
   </div>
-
   <script>
     // URLパラメータから情報を取得
     const params = new URLSearchParams(window.location.search);
