@@ -1,34 +1,60 @@
 /**
- * Google Formsへデータを送信（GAS経由）
+ * Google Formsへデータを送信（JSONP方式 - CORS回避）
  */
 async function submitToGoogleForm(data) {
-    try {
-        // GAS Web Appに送信
-        const response = await fetch(CONFIG.FORM_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                type: data.type,
-                name: data.name,
-                category: data.category,
-                price: data.price,
-                contact: data.contact || '',
-                memo: data.memo || ''
-            })
+    return new Promise((resolve, reject) => {
+        // コールバック関数名
+        const callbackName = 'jsonpCallback_' + Date.now();
+        
+        // グローバルコールバック関数を作成
+        window[callbackName] = function(response) {
+            delete window[callbackName];
+            document.body.removeChild(script);
+            
+            if (response.success) {
+                resolve(response);
+            } else {
+                reject(new Error(response.error || '送信に失敗しました'));
+            }
+        };
+        
+        // URLパラメータを構築
+        const params = new URLSearchParams({
+            callback: callbackName,
+            type: data.type,
+            name: data.name,
+            category: data.category,
+            price: data.price,
+            contact: data.contact || '',
+            memo: data.memo || ''
         });
-
-        const result = await response.json();
         
-        if (!result.success) {
-            throw new Error(result.error || '送信に失敗しました');
-        }
+        // scriptタグを作成してリクエスト送信
+        const script = document.createElement('script');
+        script.src = CONFIG.FORM_URL + '?' + params.toString();
+        script.onerror = function() {
+            delete window[callbackName];
+            document.body.removeChild(script);
+            reject(new Error('ネットワークエラー'));
+        };
         
-        return true;
+        document.body.appendChild(script);
+        
+        // タイムアウト設定（10秒）
+        setTimeout(() => {
+            if (window[callbackName]) {
+                delete window[callbackName];
+                document.body.removeChild(script);
+                reject(new Error('タイムアウトしました'));
+            }
+        }, 10000);
+    });
+}
 
-    } catch (error) {
-        console.error('送信エラー:', error);
-        throw error;
-    }
+/**
+ * ローカルストレージにバックアップ保存
+ */
+function saveToLocalStorage(data) {
+    const key = 'enjin_backup_' + Date.now();
+    localStorage.setItem(key, JSON.stringify(data));
 }
