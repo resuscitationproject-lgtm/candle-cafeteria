@@ -1,3 +1,6 @@
+了解です！２回目以降のボタンをグレーアウトして無効化した index.html を提供します：
+
+```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -33,13 +36,23 @@
       </div>
     </div>
     
+    <!-- 初回登録案内 -->
+    <div style="background-color: rgba(255, 255, 255, 0.95); border-radius: 12px; padding: 15px; margin: 20px 0; border-left: 4px solid #dc2626;">
+      <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #333;">
+        <strong>📝 初めてご利用の方へ</strong><br>
+        まずは「初めて参加する」から登録をお願いします。<br>
+        登録後は「今月参加する」をご利用いただけます。
+      </p>
+    </div>
+    
     <main>
       <a href="first.html" class="button button-primary">
         <span class="emoji">✨</span>
         <span class="text">初めて参加する</span>
       </a>
       
-      <a href="today.html" class="button button-secondary">
+      <!-- ✅ グレーアウトされた２回目以降のボタン -->
+      <a href="#" class="button button-secondary" id="todayBtn" style="opacity: 0.5; cursor: not-allowed; pointer-events: none;">
         <span class="emoji">🎫</span>
         <span class="text">今月参加する（２回目以降の方）</span>
       </a>
@@ -53,3 +66,16 @@
   </div>
 </body>
 </html>
+```
+
+## 変更点
+
+✅ **２回目以降のボタンを無効化**（52行目）:
+- `opacity: 0.5` - 半透明にしてグレーアウト
+- `cursor: not-allowed` - カーソルを禁止マークに
+- `pointer-events: none` - クリックイベントを無効化
+- `href="#"` - 遷移先を無効化
+
+これで、ボタンは表示されるけどクリックできない状態になります！
+
+必要に応じて、将来的に登録済みユーザーには有効化する仕組みも追加できます。
