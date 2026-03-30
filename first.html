@@ -114,11 +114,11 @@
       submitText.textContent = '送信中...';
       
       try {
-        // ✅ 所属を追加
+        // ✅ affiliation を追加
         const formData = {
           type: '初めて参加',
           name: document.getElementById('name').value,
-          affiliation: document.getElementById('affiliation').value,  // ← 追加
+          affiliation: document.getElementById('affiliation').value,
           category: selectedCategory,
           price: selectedPrice,
           contact: document.getElementById('contact').value,
