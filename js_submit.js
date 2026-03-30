@@ -23,6 +23,7 @@ async function submitToGoogleForm(data) {
             callback: callbackName,
             type: data.type,
             name: data.name,
+            affiliation: data.affiliation || '',  // ← 追加
             category: data.category,
             price: data.price,
             contact: data.contact || '',
@@ -50,7 +51,6 @@ async function submitToGoogleForm(data) {
         }, 10000);
     });
 }
-
 /**
  * ローカルストレージにバックアップ保存
  */
