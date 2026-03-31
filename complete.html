@@ -5,6 +5,99 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>受付完了 - 縁日食堂</title>
   <link rel="stylesheet" href="css_style.css">
+  <style>
+    /* おみくじ専用スタイル */
+    .omikuji-section {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      text-align: center;
+    }
+    
+    .omikuji-button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 18px;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+    
+    .omikuji-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+    
+    .omikuji-button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .omikuji-animation {
+      margin-top: 20px;
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .omikuji-card {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      animation: cardAppear 0.5s ease-out;
+      max-width: 300px;
+    }
+    
+    @keyframes cardAppear {
+      from {
+        opacity: 0;
+        transform: scale(0.8) rotateY(180deg);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) rotateY(0deg);
+      }
+    }
+    
+    .omikuji-spinning {
+      font-size: 60px;
+      animation: spin 0.5s linear infinite;
+    }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .omikuji-result-title {
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #dc2626;
+    }
+    
+    .omikuji-result-message {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #333;
+    }
+    
+    .daikichi { color: #dc2626; }
+    .chukichi { color: #ea580c; }
+    .shokichi { color: #f59e0b; }
+    .kichi { color: #84cc16; }
+    .suekichi { color: #06b6d4; }
+    .kyo { color: #6366f1; }
+    .daikyo { color: #9333ea; }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -12,55 +105,149 @@
       <div class="success-icon">✅</div>
       <h1>受付完了しました！</h1>
     </header>
+    
     <main>
-      <div class="message-box">
-        <h3>【受付内容】</h3>
-        <div class="receipt">
-          <div class="receipt-row">
-            <span class="label">お名前:</span>
-            <span class="value" id="displayName"></span>
-          </div>
-          <div class="receipt-row">
-            <span class="label">区分:</span>
-            <span class="value" id="displayCategory"></span>
-          </div>
-          <div class="receipt-row total">
-            <span class="label">💰 料金:</span>
-            <span class="value price" id="displayPrice"></span>
-          </div>
+      <div class="receipt-box">
+        <h2>【受付内容】</h2>
+        <div class="receipt-item">
+          <span class="label">お名前:</span>
+          <span class="value" id="displayName">-</span>
         </div>
-        <p class="payment-note">当日受付でお支払いください</p>
-        
-        <!-- 注意書き -->
-        <div style="margin-top: 20px; padding: 15px; background-color: rgba(255,255,255,0.9); border-radius: 8px; font-size: 13px; line-height: 1.6; color: #333;">
-          本イベントは非営利活動の一環として実施しており、参加費は若者支援及び運営や材料費相当の協力金です。売買ではないため、領収書の発行は行っておりません。
+        <div class="receipt-item">
+          <span class="label">区分:</span>
+          <span class="value" id="displayCategory">-</span>
         </div>
-        
-        <!-- ✅ スクリーンショット案内（上部に間隔追加） -->
-        <p style="margin-top: 25px; font-size: 14px; line-height: 1.8; color: #333;">
-          本画面をスクリーンショットで保存してください。当日は保存した画像を受付で表示してください。
-        </p>
-        
-        <p class="sub-message">お待ちしています😊</p>
+        <div class="divider"></div>
+        <div class="receipt-item price-row">
+          <span class="label">💰 料金:</span>
+          <span class="value price" id="displayPrice">-</span>
+        </div>
+        <p class="payment-note">※当日受付でお支払いください</p>
       </div>
-      <a href="index.html" class="button button-primary">
+      
+      <div class="info-box">
+        <h3>📸 この画面を保存してください</h3>
+        <p>スクリーンショットを撮って、当日受付でご提示ください。</p>
+        <p class="warning-text">
+          <strong>⚠️ 重要</strong><br>
+          本イベントは非営利活動のため、<strong>領収書の発行はできません</strong>。<br>
+          ご了承ください。
+        </p>
+      </div>
+      
+      <!-- 🎰 おみくじガチャセクション -->
+      <div class="omikuji-section">
+        <h3>🎰 今日の運勢をチェック！</h3>
+        <p>スクリーンショットを撮ったら、おみくじを引いてみましょう</p>
+        <button class="omikuji-button" id="omikujiBtn" onclick="drawOmikuji()">
+          🎴 おみくじを引く
+        </button>
+        
+        <div class="omikuji-animation" id="omikujiResult"></div>
+      </div>
+      
+      <a href="index.html" class="button button-primary" style="margin-top: 30px;">
         トップに戻る
       </a>
+      
+      <footer style="text-align: center; padding: 20px; margin-top: 40px; color: #dc2626; font-size: 14px;">
+        <p style="margin: 5px 0;">本アプリケーションは、北九州ITクラブにて開発されました。</p>
+        <p style="margin: 5px 0;">製作元:光井企画工学事務所</p>
+      </footer>
     </main>
   </div>
+  
   <script>
     // URLパラメータから情報を取得
-    const params = new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(window.location.search);
+    const name = urlParams.get('name') || '-';
+    const category = urlParams.get('category') || '-';
+    const price = urlParams.get('price') || '0';
     
-    document.getElementById('displayName').textContent = 
-      params.get('name') || '';
-    document.getElementById('displayCategory').textContent = 
-      params.get('category') || '';
+    document.getElementById('displayName').textContent = name;
+    document.getElementById('displayCategory').textContent = category;
+    document.getElementById('displayPrice').textContent = parseInt(price).toLocaleString() + '円';
     
-    const price = params.get('price');
-    if (price) {
-      document.getElementById('displayPrice').textContent = 
-        parseInt(price).toLocaleString() + '円';
+    // おみくじデータ
+    const omikujiData = [
+      {
+        result: '大吉',
+        emoji: '🌟',
+        message: '今日の出会いに感謝！\n素晴らしい交流が\n生まれる予感です',
+        class: 'daikichi'
+      },
+      {
+        result: '中吉',
+        emoji: '✨',
+        message: '美味しい料理が\nあなたを待っています\n楽しい時間になりそう',
+        class: 'chukichi'
+      },
+      {
+        result: '小吉',
+        emoji: '🎈',
+        message: '新しい学びの予感\nITスキルがアップする日\n頑張りましょう',
+        class: 'shokichi'
+      },
+      {
+        result: '吉',
+        emoji: '🍀',
+        message: '穏やかな一日\n心地よい会話が\n弾みそうです',
+        class: 'kichi'
+      },
+      {
+        result: '末吉',
+        emoji: '🌸',
+        message: '小さな幸せを\n見つけられる日\nゆっくり楽しんで',
+        class: 'suekichi'
+      },
+      {
+        result: '凶',
+        emoji: '☔',
+        message: 'たまには\nこんな日もあります\n料理で元気出して！',
+        class: 'kyo'
+      },
+      {
+        result: '大凶',
+        emoji: '🌀',
+        message: 'レアな結果！\n逆に運が良いかも？\n楽しんでいきましょう',
+        class: 'daikyo'
+      }
+    ];
+    
+    let hasDrawn = false;
+    
+    function drawOmikuji() {
+      if (hasDrawn) return;
+      
+      const btn = document.getElementById('omikujiBtn');
+      const resultDiv = document.getElementById('omikujiResult');
+      
+      // ボタン無効化
+      btn.disabled = true;
+      btn.textContent = '抽選中...';
+      
+      // スピニングアニメーション
+      resultDiv.innerHTML = '<div class="omikuji-spinning">🎴</div>';
+      
+      // 2.5秒後に結果表示
+      setTimeout(() => {
+        const randomIndex = Math.floor(Math.random() * omikujiData.length);
+        const omikuji = omikujiData[randomIndex];
+        
+        resultDiv.innerHTML = `
+          <div class="omikuji-card">
+            <div class="omikuji-result-title ${omikuji.class}">
+              ${omikuji.emoji} ${omikuji.result} ${omikuji.emoji}
+            </div>
+            <div class="omikuji-result-message">
+              ${omikuji.message.split('\n').join('<br>')}
+            </div>
+          </div>
+        `;
+        
+        hasDrawn = true;
+        btn.textContent = '✅ 引き済み';
+      }, 2500);
     }
   </script>
 </body>
