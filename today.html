@@ -71,6 +71,18 @@
     .name-check-success.show {
       display: block;
     }
+    
+    /* ボタン無効時のスタイル */
+    .button-submit:disabled {
+      background: #ccc !important;
+      cursor: not-allowed !important;
+      opacity: 0.6;
+    }
+    
+    .button-submit:disabled:hover {
+      transform: none !important;
+      box-shadow: none !important;
+    }
   </style>
 </head>
 <body>
@@ -156,7 +168,7 @@
                     placeholder="アレルギーや特記事項があればご記入ください"></textarea>
         </div>
         
-        <button type="submit" class="button button-submit" id="submitBtn">
+        <button type="submit" class="button button-submit" id="submitBtn" disabled>
           <span class="loading-spinner" style="display: none;">⏳</span>
           <span class="submit-text">受付する</span>
         </button>
@@ -187,6 +199,9 @@
         document.getElementById('totalPrice').textContent = 
           selectedPrice.toLocaleString() + '円';
         document.getElementById('priceDisplay').style.display = 'block';
+        
+        // 名前チェックが通っていて、区分も選択されたらボタン有効化
+        updateSubmitButton();
       });
     });
     
@@ -195,17 +210,23 @@
       const nameInput = document.getElementById('name');
       const name = nameInput.value.trim();
       
-      if (!name) return;
+      if (!name) {
+        // 名前が空の場合はボタン無効化
+        nameCheckPassed = false;
+        updateSubmitButton();
+        return;
+      }
       
       const loadingDiv = document.getElementById('nameCheckLoading');
       const successDiv = document.getElementById('nameCheckSuccess');
       const warningDiv = document.getElementById('nameCheckWarning');
-      const submitBtn = document.getElementById('submitBtn');
       
       // リセット
       loadingDiv.classList.remove('show');
       successDiv.classList.remove('show');
       warningDiv.classList.remove('show');
+      nameCheckPassed = false;
+      updateSubmitButton();
       
       // ローディング表示
       loadingDiv.classList.add('show');
@@ -219,16 +240,31 @@
           // 履歴あり
           successDiv.classList.add('show');
           nameCheckPassed = true;
-          submitBtn.disabled = false;
         } else {
           // 履歴なし
           warningDiv.classList.add('show');
           nameCheckPassed = false;
-          submitBtn.disabled = true;
         }
+        
+        updateSubmitButton();
+        
       } catch (error) {
         loadingDiv.classList.remove('show');
         alert('名前のチェックに失敗しました: ' + error.message);
+        nameCheckPassed = false;
+        updateSubmitButton();
+      }
+    }
+    
+    // ボタンの有効/無効を更新
+    function updateSubmitButton() {
+      const submitBtn = document.getElementById('submitBtn');
+      
+      // 名前チェック通過 + 区分選択済み → ボタン有効
+      if (nameCheckPassed && selectedCategory) {
+        submitBtn.disabled = false;
+      } else {
+        submitBtn.disabled = true;
       }
     }
     
@@ -263,7 +299,7 @@
         const formData = {
           type: '今月参加',
           name: document.getElementById('name').value,
-          affiliation: '', // 2回目以降は所属不要
+          affiliation: '',
           category: selectedCategory,
           price: selectedPrice,
           contact: document.getElementById('contact').value,
