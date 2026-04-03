@@ -3,23 +3,122 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>当日参加 - 縁日食堂</title>
+  <title>２回目以降 - 縁日食堂</title>
   <link rel="stylesheet" href="css_style.css">
+  <style>
+    /* 名前チェック用スタイル */
+    .name-check-warning {
+      display: none;
+      background: #fee;
+      border: 2px solid #dc2626;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 10px;
+      animation: shake 0.5s;
+    }
+    
+    .name-check-warning.show {
+      display: block;
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    .warning-icon {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    
+    .warning-text {
+      font-size: 14px;
+      color: #dc2626;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+    
+    .go-to-first-btn {
+      background: #dc2626;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      width: 100%;
+    }
+    
+    .name-check-loading {
+      display: none;
+      font-size: 14px;
+      color: #666;
+      margin-top: 5px;
+    }
+    
+    .name-check-loading.show {
+      display: block;
+    }
+    
+    .name-check-success {
+      display: none;
+      color: #16a34a;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+    
+    .name-check-success.show {
+      display: block;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>今月の参加（初回登録済みの方）</h1>
+      <h1>今月参加する</h1>
+      <p class="subtitle">（２回目以降の方）</p>
       <a href="index.html" class="back-link">← 戻る</a>
     </header>
-
+    
     <main>
       <form id="todayForm" class="form">
         <div class="form-group">
           <label for="name">お名前 <span class="required">*</span></label>
-          <input type="text" id="name" name="name" required placeholder="山田太郎">
+          <input 
+            type="text" 
+            id="name" 
+            name="name" 
+            required 
+            placeholder="山田太郎"
+            onblur="checkNameHistory()"
+          >
+          <small>初回登録時と同じ名前を入力してください</small>
+          
+          <!-- チェック中表示 -->
+          <div class="name-check-loading" id="nameCheckLoading">
+            ⏳ 履歴を確認中...
+          </div>
+          
+          <!-- 履歴あり表示 -->
+          <div class="name-check-success" id="nameCheckSuccess">
+            ✅ 履歴が見つかりました
+          </div>
+          
+          <!-- 履歴なし警告 -->
+          <div class="name-check-warning" id="nameCheckWarning">
+            <div class="warning-icon">⚠️</div>
+            <div class="warning-text">
+              <strong>この名前では履歴が見つかりません</strong><br>
+              まずは初回登録が必要です。<br>
+              名前の入力間違いの可能性もあるので、ご確認ください。
+            </div>
+            <button type="button" class="go-to-first-btn" onclick="goToFirstPage()">
+              📝 初回登録へ
+            </button>
+          </div>
         </div>
-
+        
         <!-- 区分選択 -->
         <div class="form-group">
           <label>区分 <span class="required">*</span></label>
@@ -36,14 +135,27 @@
           <input type="hidden" id="category" name="category" required>
           <input type="hidden" id="price" name="price">
         </div>
-
+        
         <!-- 料金表示エリア -->
         <div class="price-display" id="priceDisplay" style="display: none;">
           <div class="price-label">💰 お支払い料金</div>
           <div class="price-amount" id="totalPrice">0円</div>
           <div class="price-note">※当日受付でお支払いください</div>
         </div>
-
+        
+        <div class="form-group">
+          <label for="contact">連絡先（任意）</label>
+          <input type="text" id="contact" name="contact" 
+                 placeholder="電話番号 または メールアドレス">
+          <small>連絡先が変わった場合のみご記入ください</small>
+        </div>
+        
+        <div class="form-group">
+          <label for="memo">備考(任意)</label>
+          <textarea id="memo" name="memo" rows="3" 
+                    placeholder="アレルギーや特記事項があればご記入ください"></textarea>
+        </div>
+        
         <button type="submit" class="button button-submit" id="submitBtn">
           <span class="loading-spinner" style="display: none;">⏳</span>
           <span class="submit-text">受付する</span>
@@ -51,43 +163,89 @@
       </form>
     </main>
   </div>
-
+  
   <script src="js_config.js"></script>
   <script src="js_submit.js"></script>
   <script>
     let selectedCategory = '';
     let selectedPrice = 0;
-
+    let nameCheckPassed = false;
+    
     // 区分ボタンの処理
     document.querySelectorAll('.category-btn').forEach(btn => {
       btn.addEventListener('click', function() {
-        // 全てのボタンからactiveクラスを削除
         document.querySelectorAll('.category-btn').forEach(b => 
           b.classList.remove('active'));
-        
-        // クリックされたボタンにactiveクラスを追加
         this.classList.add('active');
         
-        // 選択された区分と料金を取得
         selectedCategory = this.dataset.category;
         selectedPrice = parseInt(this.dataset.price);
         
-        // hidden inputに値を設定
         document.getElementById('category').value = selectedCategory;
         document.getElementById('price').value = selectedPrice;
         
-        // 料金表示エリアを更新して表示
         document.getElementById('totalPrice').textContent = 
           selectedPrice.toLocaleString() + '円';
         document.getElementById('priceDisplay').style.display = 'block';
       });
     });
-
+    
+    // 名前履歴チェック
+    async function checkNameHistory() {
+      const nameInput = document.getElementById('name');
+      const name = nameInput.value.trim();
+      
+      if (!name) return;
+      
+      const loadingDiv = document.getElementById('nameCheckLoading');
+      const successDiv = document.getElementById('nameCheckSuccess');
+      const warningDiv = document.getElementById('nameCheckWarning');
+      const submitBtn = document.getElementById('submitBtn');
+      
+      // リセット
+      loadingDiv.classList.remove('show');
+      successDiv.classList.remove('show');
+      warningDiv.classList.remove('show');
+      
+      // ローディング表示
+      loadingDiv.classList.add('show');
+      
+      try {
+        const exists = await checkNameExists(name);
+        
+        loadingDiv.classList.remove('show');
+        
+        if (exists) {
+          // 履歴あり
+          successDiv.classList.add('show');
+          nameCheckPassed = true;
+          submitBtn.disabled = false;
+        } else {
+          // 履歴なし
+          warningDiv.classList.add('show');
+          nameCheckPassed = false;
+          submitBtn.disabled = true;
+        }
+      } catch (error) {
+        loadingDiv.classList.remove('show');
+        alert('名前のチェックに失敗しました: ' + error.message);
+      }
+    }
+    
+    // 初回登録ページへ遷移
+    function goToFirstPage() {
+      location.href = 'first.html';
+    }
+    
     // フォーム送信処理
     document.getElementById('todayForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
-      // 区分が選択されているか確認
+      if (!nameCheckPassed) {
+        alert('名前の履歴確認が必要です');
+        return;
+      }
+      
       if (!selectedCategory) {
         alert('区分を選択してください');
         return;
@@ -97,29 +255,24 @@
       const spinner = submitBtn.querySelector('.loading-spinner');
       const submitText = submitBtn.querySelector('.submit-text');
       
-      // ローディング表示
       submitBtn.disabled = true;
       spinner.style.display = 'inline-block';
       submitText.textContent = '送信中...';
-
+      
       try {
-        // フォームデータを取得
         const formData = {
-          type: '今月参加',  // ✅ 固定値に変更
+          type: '今月参加',
           name: document.getElementById('name').value,
+          affiliation: '', // 2回目以降は所属不要
           category: selectedCategory,
           price: selectedPrice,
-          contact: '',
-          memo: ''
+          contact: document.getElementById('contact').value,
+          memo: document.getElementById('memo').value
         };
-
-        // Google Formsへ送信
-        await submitToGoogleForm(formData);
         
-        // ローカルストレージにバックアップ
+        await submitToGoogleForm(formData);
         saveToLocalStorage(formData);
         
-        // ✅ 完了ページへ遷移（パラメータ追加）
         location.href = 'complete.html?name=' + encodeURIComponent(formData.name) + 
                         '&category=' + encodeURIComponent(formData.category) + 
                         '&price=' + selectedPrice;
@@ -127,7 +280,6 @@
       } catch (error) {
         alert('送信に失敗しました。もう一度お試しください。\n' + error.message);
         
-        // ボタンを元に戻す
         submitBtn.disabled = false;
         spinner.style.display = 'none';
         submitText.textContent = '受付する';
