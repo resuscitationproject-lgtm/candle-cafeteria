@@ -231,8 +231,26 @@
       
       // 2.5秒後に結果表示
       setTimeout(() => {
-        const randomIndex = Math.floor(Math.random() * omikujiData.length);
-        const omikuji = omikujiData[randomIndex];
+        // ✅ ポジティブ寄せアルゴリズム
+        // 大吉25%, 中吉30%, 小吉20%, 吉15%, 末吉7%, 凶2.5%, 大凶0.5%
+        const rand = Math.random() * 100;
+        let omikuji;
+        
+        if (rand < 25) {
+          omikuji = omikujiData[0]; // 大吉 25%
+        } else if (rand < 55) {
+          omikuji = omikujiData[1]; // 中吉 30%
+        } else if (rand < 75) {
+          omikuji = omikujiData[2]; // 小吉 20%
+        } else if (rand < 90) {
+          omikuji = omikujiData[3]; // 吉 15%
+        } else if (rand < 97) {
+          omikuji = omikujiData[4]; // 末吉 7%
+        } else if (rand < 99.5) {
+          omikuji = omikujiData[5]; // 凶 2.5%
+        } else {
+          omikuji = omikujiData[6]; // 大凶 0.5%
+        }
         
         resultDiv.innerHTML = `
           <div class="omikuji-card">
